@@ -1,8 +1,7 @@
 (function (global, factory) {
   "use strict";
   if (typeof module === "object" && typeof module.exports === "object") {
-	module.exports = 
-		global.document
+    module.exports = global.document
       ? factory(global, true)
       : function (w) {
           if (!w.document) {
@@ -594,7 +593,6 @@
   };
 
   var readyList = HB.Deferred();
-
   HB.fn.ready = function (fn) {
     readyList.then(fn).catch(function (error) {
       HB.readyException(error);
