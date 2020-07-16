@@ -10,7 +10,6 @@ module.exports = {
     const sType = this.reqType;
     const errMsg = { code: "-1", msg: "获取数据出错", data: {} };
     if (sType === "cordova") {
-      console.log(cordova);
       if (!isNode) {
         const { cordovaExec } = require("./reqSend");
         cordovaExec(action, params, callback, type);
@@ -22,12 +21,8 @@ module.exports = {
     }
 
     if (sType === "web") {
-      if (!isNode) {
-        const { ajaxPost } = require("./reqSend");
-        ajaxPost(action, params, callback);
-        return;
-      }
-
+      const { ajaxPost } = require("./reqSend");
+      ajaxPost(action, params, callback);
       return;
     }
 

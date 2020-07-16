@@ -1,8 +1,4 @@
 let url = "https://api.zhaoshang800.com";
-let cordovaUrl =
-  process.env.NODE_ENV === "development"
-    ? "http://test.zhaoshang800.local"
-    : "https://app.zhaoshang800.com";
 
 if (location.hostname === "app.zhaoshang800.com") {
   url = "https://api.zhaoshang800.com";
@@ -31,4 +27,4 @@ if (location.hostname == "sit.pmis.zhaoshang800.local") {
 // 本地测试地址
 url = "http://test.zhaoshang800.local";
 
-export { url, cordovaUrl };
+export { url };

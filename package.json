@@ -8,7 +8,7 @@
     "start": "webpack-dev-server",
     "build": "webpack"
   },
-  "author": "",
+  "author": "huangjin",
   "license": "ISC",
   "devDependencies": {
     "@babel/core": "^7.4.0",

@@ -1,14 +1,12 @@
-const errMsg = { code: "-1", msg: "获取数据出错", data: {} };
-
 export function ajaxPost(action, params, callback) {
   const { post } = require("./web/webHttp");
   post(action, params)
     .then((res) => callback(res))
-    .catch(() => callback(errMsg));
+    .catch(() => callback({ code: "-1", msg: "获取数据出错", data: {} }));
 }
 
 function promiseTimeout(promise, delay) {
-  let timeout = new Promise(function (reslove, reject) {
+  let timeout = new Promise(function (resolve, reject) {
     setTimeout(function () {
       reject("超时");
     }, delay);

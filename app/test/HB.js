@@ -1,6 +1,5 @@
 import { device, load } from "./HBUtils";
-import req from "./hbReq";
-import { cordovaUrl } from "./setup";
+import req from "./HBReq";
 
 class HB {
   constructor() {
@@ -14,14 +13,20 @@ class HB {
   initDevice(env) {
     switch (env) {
       case "ios":
-        load(`${cordovaUrl}/HB/dist/cordova/ios/cordova.js`, () => {
-          this.checkCordovaReady();
-        });
+        load(
+          "https://i.cdn.zhaoshang800.com/web-resources/cordova/ios/cordova.js",
+          () => {
+            this.checkCordovaReady();
+          }
+        );
         break;
       case "android":
-        load(`${cordovaUrl}/HB/dist/cordova/android/cordova.js`, () => {
-          this.checkCordovaReady();
-        });
+        load(
+          "https://i.cdn.zhaoshang800.com/web-resources/cordova/android/cordova.js",
+          () => {
+            this.checkCordovaReady();
+          }
+        );
         break;
       default:
         this.initReq("web");
