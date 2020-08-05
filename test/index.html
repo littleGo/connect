@@ -1,0 +1,456 @@
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>
+        交互示例
+    </title>
+    <script src="../dist/HB.js" type="text/javascript">
+    </script>
+    <meta content="width=device-width,initial-scale=1,user-scalable=0,viewport-fit=cover" name="viewport">
+    </meta>
+    <link href="http://res.wx.qq.com/open/libs/weui/1.1.3/weui.min.css" rel="stylesheet" />
+    </meta>
+    <style>
+        html, body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+    }
+    body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .content {
+        width: 80%;
+    }
+    </style>
+</head>
+
+<body>
+    <div class="content">
+        <a class="weui-btn weui-btn_primary" onclick="smartPark()">
+            iOS通用链接-打开智慧园区
+        </a>
+        <a class="weui-btn weui-btn_primary" onclick="huoban()">
+            iOS通用链接-打开伙伴人
+        </a>
+        <a id="bridge" class="weui-btn weui-btn_primary" onclick="nativeActionTest()">
+            测试所有桥接方法
+        </a>
+    </div>
+</body>
+<script type="text/javascript">
+function huoban(resolve) {
+    // 路由信息
+    var jumpInfo = {
+        "routeKey": "APP_MARKET_HELPER",
+        "params": [{ "type": 2 }]
+    };
+    // 固定的, 包括最后的'/'
+    var universalLink = 'https://i.zhaoshang800.com/huoban/';
+    var url = universalLink + '?jumpInfo=' + encodeURIComponent(JSON.stringify(jumpInfo));
+    window.location.href = url;
+};
+
+function smartPark(resolve) {
+    // 路由信息
+    var jumpInfo = {
+        "routeKey": "APP_HELP_CENTER",
+        "params": [{
+            "label": "URLString",
+            "value": "http://www.baidu.com"
+        }]
+    };
+    // 固定的, 包括最后的'/'
+    var universalLink = 'https://i.zhaoshang800.com/smart/';
+    var url = universalLink + '?jumpInfo=' + encodeURIComponent(JSON.stringify(jumpInfo));
+    window.location.href = url;
+};
+
+// HB库 项目常用API说明 http://showdoc.zhaoshang800.local/web/#/19?page_id=1661
+// HB库是伙伴经纪人APP使用的原生与H5通信模块，是在cordova基础上。可以通过分辨当前设备环境加载相应模块进行通信。支持web、android、ios。
+let hb = new HB();
+
+function isEmpty(obj) {
+    if (typeof obj === 'undefined' || obj == null || obj === '') {
+        return true
+    }
+    return false
+}
+
+function nonnull(resolve) {
+    for (var i = 0; i < arguments.length; i++) {
+        if (isEmpty(arguments[i])) {
+            throw new Error("参数为空");
+        }
+    }
+}
+
+function nativeAction(action, params, callback) {
+    if (isEmpty(params)) {
+        params = {}
+    }
+    console.log("exec nativeAction: [" + action + "]" + " params:" + JSON.stringify(params));
+    hb.req.send(action, params, callback, 'nativeAction');
+}
+
+function getRemoteData(service, params, callback) {
+    if (isEmpty(params)) {
+        params = {}
+    }
+    console.log("exec getRemoteData: [" + action + "]" + " params:" + JSON.stringify(params));
+    hb.req.send(service, params, callback, 'getRemoteData');
+}
+
+function getLocalData(action, params, callback) {
+    // 在iOS中作用等同于nativeAction  android中不等同nativeAction
+    if (isEmpty(params)) {
+        params = {}
+    }
+    console.log("exec getLocalData: [" + action + "]" + " params:" + JSON.stringify(params));
+    hb.req.send(action, params, callback, 'getLocalData');
+}
+
+//////////////////////////////////////////////////
+// 分享
+/////////////////////////////////////////////////
+function getUrlBase64(url, ext, callback) {
+    var canvas = document.createElement("canvas"); //创建canvas DOM元素
+    var ctx = canvas.getContext("2d");
+    var img = new Image;
+    img.crossOrigin = 'Anonymous';
+    img.src = url;
+    img.onload = function(resolve) {
+        canvas.height = img.height; //指定画板的高度,自定义
+        canvas.width = img.width; //指定画板的宽度，自定义
+        ctx.drawImage(img, 0, 0, img.width, img.height); //参数可自定义
+        var dataURL = canvas.toDataURL("image/" + ext);
+        callback.call(this, dataURL); //回掉函数获取Base64编码
+        canvas = null;
+    };
+};
+
+function shareWeb(resolve) {
+    nativeAction('share', {
+            content: '网页',
+            title: 'title',
+            logo: 'https://dss0.bdstatic.com/70cFvHSh_Q1YnxGkpoWK1HF6hhy/it/u=3372687940,2485060542&fm=26&gp=0.jpg',
+            url: 'http://www.baidu.com',
+            platforms: [1, 2, 3, 4, 5],
+            showShareDialog: true
+        },
+        data => {
+            console.log('分享完成', data);
+            resolve ? resolve() : null;
+        });
+};
+
+function shareImage(resolve) {
+    nativeAction('share', {
+            content: '图片',
+            title: 'title',
+            logo: 'https://www.baidu.com/img/pc_ede120f393776516980bdaa3dca88493.png',
+            url: 'http://www.baidu.com',
+            image: 'https://dss0.bdstatic.com/70cFvHSh_Q1YnxGkpoWK1HF6hhy/it/u=3372687940,2485060542&fm=26&gp=0.jpg',
+            platforms: [1, 2, 3, 4, 5],
+            showShareDialog: true
+        },
+        data => {
+            console.log('分享完成', data);
+            resolve ? resolve() : null;
+        });
+};
+
+function shareBase64Image(resolve) {
+    nativeAction('showInitLoading');
+    var url = 'https://desk-fd.zol-img.com.cn/t_s1920x1200c5/g5/M00/02/02/ChMkJlbKxe-IOYWmABlkYsPUu00AALHdgJXOi0AGWR6713.jpg';
+    getUrlBase64(url, 'jpg', imageBase64String => {
+        nativeAction('hideInitLoading');
+        nativeAction('share', {
+                content: '图片',
+                title: 'title',
+                logo: 'https://www.baidu.com/img/pc_ede120f393776516980bdaa3dca88493.png',
+                url: 'http://www.baidu.com',
+                image: imageBase64String,
+                platforms: [1, 2, 3, 4, 5],
+                type: 2,
+                showShareDialog: true
+            },
+            data => {
+                console.log('分享完成', data);
+                resolve ? resolve() : null;
+            });
+    });
+};
+
+function shareMiniApp(resolve) {
+    nativeAction('share', {
+            title: '小程序',
+            logo: '',
+            url: 'http://www.baidu.com',
+            path: 'page/index/index?brokerId=1',
+            type: 3,
+            showShareDialog: true
+        },
+        data => {
+            console.log('分享完成', data);
+            resolve ? resolve() : null;
+        });
+};
+
+function shareMiniAppAndImage(resolve) {
+    nativeAction('share', {
+            title: '小程序+图片',
+            logo: 'https://dss0.bdstatic.com/70cFvHSh_Q1YnxGkpoWK1HF6hhy/it/u=3372687940,2485060542&fm=26&gp=0.jpg',
+            url: 'http://www.baidu.com',
+            path: `page / index / index ? brokerId = 1`,
+            image: 'https://dss0.bdstatic.com/70cFvHSh_Q1YnxGkpoWK1HF6hhy/it/u=3372687940,2485060542&fm=26&gp=0.jpg',
+            type: 3,
+            platforms: [1, 2, 3, 4, 5],
+            showShareDialog: true
+        },
+        data => {
+            console.log('分享完成', data);
+            resolve ? resolve() : null;
+        });
+};
+
+// 获取APP信息
+function getAppInfo(resolve) {
+    getLocalData('getAppInfo', null, data => {
+        // {version: "4.8.0"}
+        console.log(data);
+        resolve ? resolve() : null;
+    });
+}
+// 获取用户信息
+function getUserInfo(resolve) {
+    getLocalData('getUserInfo', null, data => {
+        // 
+        console.log(data);
+        resolve ? resolve() : null;
+    });
+}
+// 原生图片浏览器, 支持图片放大
+function enlargeImg(resolve) {
+    var url1 = "https://img.cdn.zhaoshang800.com/zgImg/sims/2020/06/10/6aOk6bOFHw2TNV562v4iyHhrWFKHfbYmmT7L5gXW.jpg";
+    var url2 = "https://m.zhaoshang800.com/NewStyles/images/logo.png";
+    nativeAction('enlargeImg', { "list": [url1, url2], "index": 1 });
+    resolve ? resolve() : null;
+}
+// 拨打电话
+function phoneCall(resolve) {
+    nativeAction('phoneCall', { "phoneNumber": 13800138000 })
+    resolve ? resolve() : null;
+}
+// 调用系统通讯录
+function pickContact(resolve) {
+    nativeAction('pickContact');
+    resolve ? resolve() : null;
+}
+// 下载文件, 下载完成后会调用refresh(文件名)函数
+// iOS: 会先请求文件信息, 请求成功后返回调用成功, 再去下载文件
+function downLoadFile(resolve) {
+    var url = "https://img.cdn.zhaoshang800.com/zgImg/sims/2020/06/10/6aOk6bOFHw2TNV562v4iyHhrWFKHfbYmmT7L5gXW.jpg";
+    nativeAction('downLoadFile', { "file": url }, data => {
+        console.log(data);
+        resolve ? resolve() : null;
+    });
+}
+// 打开文件
+function openFile(resolve) {
+    var url = "https://img.cdn.zhaoshang800.com/zgImg/sims/2020/06/10/6aOk6bOFHw2TNV562v4iyHhrWFKHfbYmmT7L5gXW.jpg";
+    nativeAction('openFile', { "file": url });
+    resolve ? resolve() : null;
+}
+// 检查文件是否已下载完成
+function checkFilesExist(resolve) {
+    var url = "https://img.cdn.zhaoshang800.com/zgImg/sims/2020/06/10/6aOk6bOFHw2TNV562v4iyHhrWFKHfbYmmT7L5gXW.jpg";
+    nativeAction('checkFilesExist', { "files": [url] }, data => {
+        console.log(data);
+        resolve ? resolve() : null;
+    });
+}
+// 查看/下载系统公告附件
+function showDownloadNoticeFilesPage(resolve) {
+    nativeAction('showDownloadNoticeFilesPage', {
+        "id": 123456
+    });
+    resolve ? resolve() : null;
+}
+// 保存图片到相册, 完成后会调用refresh({"url": xxx, "code": 200, "msg": xxx}})函数
+function savePics(resolve) {
+    var url = "https://img.cdn.zhaoshang800.com/zgImg/sims/2020/06/10/6aOk6bOFHw2TNV562v4iyHhrWFKHfbYmmT7L5gXW.jpg";
+    nativeAction('savePics', { "piclist": [url] }, data => {
+        console.log(data);
+        resolve ? resolve() : null;
+    });
+}
+// 调用原生路由跳转, 路由表在 `伙伴人管理后台->运营->App菜单->路由配置`
+function changePage(resolve) {
+    var jumpInfo = {
+        "routeKey": "APP_MARKET_HELPER",
+        "params": [{ "type": 2 }]
+    };
+    nativeAction('changePage', jumpInfo);
+    resolve ? resolve() : null;
+}
+// 调用系统回退页面
+function backPage(resolve) {
+    nativeAction('backPage', {
+        "needRefresh": 1 // 1表示回退后刷新页面，0不刷新
+    });
+    resolve ? resolve() : null;
+}
+// 显示原生loading
+// iOS: showInitLoading和hideInitLoading必须成对出现
+function showInitLoading(resolve) {
+    nativeAction('showInitLoading');
+    setTimeout(function() {
+        hideInitLoading();
+        resolve ? resolve() : null;
+    }, 3000);
+}
+// 隐藏loading
+// iOS: showInitLoading和hideInitLoading必须成对出现
+function hideInitLoading(resolve) {
+    nativeAction('hideInitLoading');
+    resolve ? resolve() : null;
+}
+// 原生吐司
+function showToast(resolve) {
+    nativeAction('showToast', { "text": "原生吐司" });
+    resolve ? resolve() : null;
+}
+// 报错误日志
+function umengError(resolve) {
+    nativeAction('umengError', { "随便传": "反正都是直接丢给友盟" });
+    resolve ? resolve() : null;
+}
+// 埋点统计
+function umengEevent(resolve) {
+    nativeAction('umengEevent', {
+        "umengKey": "toHome",
+        "umengParams": [{
+            "key": 'userId', // key, value两个字段固定
+            "value": '123456'
+        }]
+    });
+    resolve ? resolve() : null;
+}
+// 选择时间
+function selectTime(resolve) {
+    nativeAction('selectTime', {
+        timeSelectType: 0, // 0—单选年月, 1—年单选，月多选
+        type: 1, // 1-月, 2-年
+        startTime: new Date().getTime(), //时间戳, 毫秒
+        endTime: new Date().getTime(), //时间戳, 毫秒
+    }, data => {
+        console.log(data);
+        resolve ? resolve() : null;
+    });
+}
+// 选择部门
+function selectDepartmentOrPeople(resolve) {
+    nativeAction('selectDepartmentOrPeople', {
+        type: 1, //1公司，2区域，5分行，7片区，999城市，1000人
+        selectAuthorityType: 1 //0 部门人员都全部   1部门人员都范围
+    }, data => {
+        console.log(data);
+        resolve ? resolve() : null;
+    });
+}
+// 获取ios android 各机型头部状态栏高度
+function getStatusBarHeight(resolve) {
+    nativeAction('getStatusBarHeight', null, data => {
+        console.log(data);
+        resolve ? resolve() : null;
+    });
+}
+// 原生横竖屏切换
+function changeOrientation(resolve) {
+    nativeAction('changeOrientation');
+    resolve ? resolve() : null;
+}
+// 为当前web添加当前用户信息水印
+function addWaterMark(resolve) {
+    nativeAction('addWaterMark');
+    resolve ? resolve() : null;
+}
+
+// 代理项目推荐客户
+function dlRecommendClient() {
+    throw new Error("参数未知, 调用处未知");
+}
+// 协同项目推荐客户
+function xtRecommendClient() {
+    throw new Error("参数未知, 调用处未知");
+}
+// 分类图片查看器
+function enlargeImgBundle() {
+    throw new Error("已废弃");
+}
+// 打开客户列表
+function openCustomerList() {
+    throw new Error("已废弃");
+}
+// 获取地理位置信息
+function getGeoLocation() {
+    throw new Error("已废弃");
+}
+
+var actions = [
+    "getAppInfo",
+    "getUserInfo",
+    "enlargeImg",
+    "phoneCall",
+    "pickContact",
+    "downLoadFile",
+    "openFile",
+    "checkFilesExist",
+    "showDownloadNoticeFilesPage",
+    "savePics",
+    "changePage",
+    "showInitLoading",
+    "hideInitLoading",
+    "showToast",
+    "umengError",
+    "umengEevent",
+    "selectTime",
+    "selectDepartmentOrPeople",
+    "getStatusBarHeight",
+    "changeOrientation",
+    "changeOrientation",
+    "addWaterMark",
+    "shareWeb",
+    "shareImage",
+    "shareMiniApp",
+    "shareMiniAppAndImage",
+    "shareBase64Image",
+    "backPage"
+];
+
+function nativeActionTest() {
+    if (actions.length > 0) {
+        let action = actions.shift();
+        var button = document.getElementById('bridge');
+        button.innerHTML = action + "执行中..";
+        let next = function() {
+            if (actions.length > 0) {
+                button.innerHTML = "下一个:" + actions[0];
+            } else {
+                button.innerHTML = "已完成";
+            }
+        };
+        eval(action + '(next)');
+    } else {
+        var button = document.getElementById('bridge');
+        button.innerHTML = "已完成";
+    }
+}
+</script>
+
+</html>

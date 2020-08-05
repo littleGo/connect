@@ -1,6 +1,7 @@
 // import HB from "./hbbis-0.1.10/js/HB.js";
 // import TEST from "./test/HB";
 import TEST from "../dist/HB";
+// const TEST = require("../dist/HB");
 console.log(TEST);
 // var hb = new HB();
 // console.log(hb);

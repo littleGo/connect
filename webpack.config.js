@@ -1,14 +1,14 @@
 const path = require("path");
 
 module.exports = {
-  mode: "none", // "production" | "development" | "none"
-  // entry: "./app/test/HB.js", // 入口文件
-  entry: "./app/index.js", // 入口文件
+  mode: "production", // "production" | "development" | "none"
+  entry: "./app/HB.js",
   output: {
-    path: path.resolve(__dirname, "dist"), // 出口路径
-    // filename: "HB.js", // 输出文件名
-    filename: "bundle.js", // 输出文件名
-    publicPath: "/xuni/", // 输出虚拟路径
+    path: path.resolve(__dirname, "dist"),
+    filename: "HB.js",
+    libraryExport: "default", // 对外暴露default属性，就可以直接调用default里的属性
+    library: "HB", // 指定类库名,主要用于直接引用的方式(比如使用script 标签)
+    libraryTarget: "umd", // 定义打包方式Universal Module Definition,同时支持在CommonJS、AMD和全局变量使用
   },
   module: {
     rules: [
@@ -32,6 +32,6 @@ module.exports = {
     host: "0.0.0.0",
     inline: true, // 用来支持dev-server自动刷新的配置
     hot: true, // 启动webpack热模块替换特性
-    port: 9527, //端口号(默认8080)
+    port: 9527,
   },
 };
